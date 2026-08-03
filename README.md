@@ -67,7 +67,7 @@ Type `\q` to leave the PostgreSQL shell.
 Make sure Ollama is installed, then download the default tool-capable model:
 
 ```bash
-ollama pull qwen3
+ollama pull qwen3.6
 ```
 
 If Ollama is not already running as a background service, start it in a separate
