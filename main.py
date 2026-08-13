@@ -12,7 +12,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model",
-        default="qwen3.6",
+        default="qwen3.6:35b",
         help="Name of the local Ollama model to use (default: qwen3).",
     )
     parser.add_argument(
