@@ -3,3 +3,6 @@
 
 # Local environment variables and secrets
 .env
+
+# Ollama log written by run.sh
+.ollama-serve.log

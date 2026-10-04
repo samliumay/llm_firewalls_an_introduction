@@ -53,10 +53,51 @@ bypass the firewall through a tool argument.
 Before you begin, make sure you have:
 
 - [Python 3.10+](https://www.python.org/downloads/)
-- [Docker](https://docs.docker.com/get-docker/) with Docker Compose
+- [Docker](https://docs.docker.com/get-docker/) with Docker Compose v2
 - [Ollama](https://ollama.com/)
+- [uv](https://docs.astral.sh/uv/) (optional; `run.sh` falls back to `python3 -m venv` and pip)
 
 Run all commands from the repository root.
+
+### One command
+
+```bash
+./run.sh
+```
+
+Then open <http://127.0.0.1:8001>. The script does the setup below for you, and
+every step is safe to repeat:
+
+1. Creates `configurations/.env` from `.env.example` with a random local
+   database password, if the file does not exist.
+2. Starts PostgreSQL in Docker. If port 5432 is already taken by another
+   program, it picks the next free port and saves it as `POSTGRES_PORT` in
+   `configurations/.env`, so `python main.py` uses the same port.
+3. Creates `.venv` and installs `requirments.txt`.
+4. Starts `ollama serve` if Ollama is not running (and stops it again on exit),
+   and pulls the model the first time.
+5. Launches the web UI on `127.0.0.1:8001`. It uses 8001 rather than 8000 so it
+   can run next to the [local LLM pentesting lab](https://github.com/samliumay/local_llm_pentesting_lab) UI.
+
+| Command | What it does |
+| --- | --- |
+| `./run.sh` | Set up everything and start the web UI |
+| `./run.sh --cli` | Same setup, then start the terminal chat (`main.py`) |
+| `./run.sh --cli -- --disable-firewall` | Terminal chat in unprotected mode |
+| `./run.sh --model llama3.1:8b` | Use another Ollama model for this run |
+| `./run.sh --port 8080` | Serve the web UI on another port (a busy port is skipped automatically) |
+| `./run.sh --stop` | Stop the database container (data is kept) |
+
+The default model is `qwen3.6:35b`, a download of over 20 GB the first time. For a
+quicker start on smaller machines, use `--model llama3.1:8b`, or set
+`OLLAMA_MODEL=llama3.1:8b` in `configurations/.env` to make it the default.
+
+> [!NOTE]
+> PostgreSQL only applies `POSTGRES_USER`, `POSTGRES_DB`, and `POSTGRES_PASSWORD`
+> when its data volume is first created. If you change them later, reset the demo
+> data with `docker compose -f configurations/docker-compose.yml down -v && ./run.sh`.
+
+The numbered steps below do the same thing by hand.
 
 ### 1. Create the Python environment
 
@@ -88,7 +129,9 @@ docker compose -f configurations/docker-compose.yml ps
 ```
 
 The first startup creates a `customers` table and fills it with fictional sample
-data from `configurations/postgres/init/`.
+data from `configurations/postgres/init/`. PostgreSQL listens on
+`127.0.0.1:5432`; to use another port, set `POSTGRES_PORT` in
+`configurations/.env` (Compose and the application both read it).
 
 <details>
 <summary><strong>Inspect the sample data directly</strong></summary>
@@ -154,6 +197,31 @@ database. Use it only with the included local data.
 
 Type `exit` or `quit` in either mode to end the conversation.
 
+### Web UI
+
+A browser interface wraps the same Ollama integration and firewall. The easiest
+way to start it is [`./run.sh`](#one-command), which also starts PostgreSQL and
+Ollama. To launch only the web server yourself, with PostgreSQL and Ollama
+already running:
+
+```bash
+python web.py                       # http://127.0.0.1:8000
+python web.py --port 8080 --model qwen3
+```
+
+The server listens on `127.0.0.1` only. In the page you can:
+
+- chat with the banking assistant, and see each SQL query the model generated
+  with its firewall verdict (`ALLOWED`, `BLOCKED`, or `NOT INSPECTED`), the
+  block reason, and the returned rows or database error;
+- switch between protected and unprotected mode, or pick another installed
+  model (either change starts a new conversation);
+- test a SQL string against the firewall rules alone, without the model or the
+  database.
+
+If Ollama or PostgreSQL is unavailable, the page shows the error and any
+firewall verdicts reached before the failure.
+
 ### 6. Stop the database
 
 ```bash
@@ -201,7 +269,10 @@ flowchart LR
 ├── llm_integrations/
 │   ├── database_layer.py        # Protected and direct execution paths
 │   └── ollama_based_integration.py
+├── webui/                       # Flask app and static page for the web UI
 ├── main.py                      # Command-line entry point
+├── run.sh                       # One-command setup and launcher
+├── web.py                       # Web UI entry point
 └── requirments.txt              # Python dependencies
 ```
 
