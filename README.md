@@ -290,3 +290,25 @@ flowchart LR
 > Do not treat this proof of concept as a replacement for least-privilege
 > database roles, read-only transactions, query parsing, auditing, or other
 > production security controls.
+
+## Roadmap
+
+- [ ] **Compare database roles, not just firewall modes.** The demo connects as
+  `firewall_user`, which the PostgreSQL image creates as a superuser. A query
+  such as `SELECT pg_read_file(...)` passes the firewall because it is a
+  `SELECT`, and the superuser can then read files on the database server, so
+  the database role decides the outcome as much as the firewall does. Planned:
+  - a restricted role (for example `SELECT` on `customers` only, no
+    `pg_read_server_files`) created by an extra script in
+    `configurations/postgres/init/`;
+  - a switch to pick the role (`--db-role superuser|restricted` and a matching
+    web UI control);
+  - a fixed set of queries (plain reads, writes, `pg_read_file`, …) run against
+    every combination of firewall on/off and superuser/restricted role,
+    recording the **firewall verdict** (allowed or blocked) separately from the
+    **database outcome** (succeeded or denied);
+  - that comparison as a regression test, so a privilege change that reopens a
+    path the firewall still allows makes the test fail.
+
+  Suggested by Leslie Walker. Contributions are welcome: open an issue or a
+  pull request.
