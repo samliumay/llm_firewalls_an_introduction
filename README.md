@@ -199,7 +199,7 @@ Type `exit` or `quit` in either mode to end the conversation.
 
 ### Web UI
 
-A browser interface wraps the same Ollama integration and firewall. The easiest
+A [Gradio](https://www.gradio.app/) interface wraps the same Ollama integration and firewall. The easiest
 way to start it is [`./run.sh`](#one-command), which also starts PostgreSQL and
 Ollama. To launch only the web server yourself, with PostgreSQL and Ollama
 already running:
@@ -269,7 +269,7 @@ flowchart LR
 ├── llm_integrations/
 │   ├── database_layer.py        # Protected and direct execution paths
 │   └── ollama_based_integration.py
-├── webui/                       # Flask app and static page for the web UI
+├── webui/                       # Gradio app for the web UI
 ├── main.py                      # Command-line entry point
 ├── run.sh                       # One-command setup and launcher
 ├── web.py                       # Web UI entry point

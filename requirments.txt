@@ -1,4 +1,4 @@
 requests
 psycopg[binary]
 python-dotenv
-flask
+gradio>=6.30,<7

@@ -1,10 +1,13 @@
 """Launch the browser UI for the LLM firewall demonstration."""
 
 import argparse
+import os
 
-from webui import create_app
+from webui import create_app, launch_options
 
-HOST = "127.0.0.1"  # Local only. The unprotected mode can modify the database.
+# Local only. The unprotected mode can modify the database. The Hugging Face
+# Space overrides this inside its isolated container.
+HOST = os.environ.get("GRADIO_SERVER_NAME", "127.0.0.1")
 
 
 def main() -> None:
@@ -18,8 +21,11 @@ def main() -> None:
     arguments = parser.parse_args()
 
     app = create_app(default_model=arguments.model)
-    print(f"Open http://{HOST}:{arguments.port} in your browser.")
-    app.run(host=HOST, port=arguments.port, threaded=True, debug=False)
+    app.queue(default_concurrency_limit=1).launch(
+        server_name=HOST,
+        server_port=arguments.port,
+        **launch_options(),
+    )
 
 
 if __name__ == "__main__":
