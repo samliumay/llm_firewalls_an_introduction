@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ LLM Firewalls: An Introduction
+# <img src="https://api.iconify.design/lucide/shield.svg?color=%236e7781" width="28" alt="" /> LLM Firewalls: An Introduction
 
 ### Inspect model-generated SQL before it reaches your database
 
@@ -30,8 +30,8 @@ execute it.
 
 | Mode | SQL path | Behavior |
 | --- | --- | --- |
-| 🟢 **Protected** (default) | Ollama → firewall → PostgreSQL | Allows read-oriented queries and blocks modifying or administrative SQL |
-| 🟠 **Unprotected** (demo only) | Ollama → PostgreSQL | Executes model-generated SQL directly to make the risk visible |
+| <img src="https://api.iconify.design/lucide/shield-check.svg?color=%2316a34a" width="16" alt="" /> **Protected** (default) | Ollama → firewall → PostgreSQL | Allows read-oriented queries and blocks modifying or administrative SQL |
+| <img src="https://api.iconify.design/lucide/shield-alert.svg?color=%23ea580c" width="16" alt="" /> **Unprotected** (demo only) | Ollama → PostgreSQL | Executes model-generated SQL directly to make the risk visible |
 
 The application—not the model—selects the execution mode. The model cannot
 bypass the firewall through a tool argument.
